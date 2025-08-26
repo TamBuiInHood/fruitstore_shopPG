@@ -1,33 +1,64 @@
-## ASPnetcore microservice
+## Server Side with microservice
 
+# Docker Compose Setup
+
+## 1. Run Docker Compose
+Chạy lệnh sau trong thư mục **src** (nơi chứa file `docker-compose`):
+
+```powershell
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --remove-orphans
 ```
-Go to the folder contain file `docker-compose` (folder src)
-1. Run docker compose
-	``` powershell
-	docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --remove-orphans
-	```
-## Application config URL - Local environment (for docker container):
-- Produt API: http://localhost:6002/api/products
-- Customer API: http://localhost:6003/api/customers
-- Basket API: http://localhost:6004/api/baskets
 
-## Application config URL - Developer environment (for dev):
-- Produt API: http://localhost:5002/api/products
-- Customer API: http://localhost:5003/api/customers
-- Basket API: http://localhost:5004/api/baskets
+---
 
-## Docker Application URL - Local 
-- Portainer: localhost:9000 - username: admin ; password admin12345678
-- kibana : localhost: 5601 - username: elastic ; pass: admin
-- rabbitMQ: localhost: 15672 - username: guest; pass: guest
+## 2. Application Config URL
 
+### Local Environment (Docker Container)
+- **Product API**: [http://localhost:6002/api/products](http://localhost:6002/api/products)  
+- **Customer API**: [http://localhost:6003/api/customers](http://localhost:6003/api/customers)  
+- **Basket API**: [http://localhost:6004/api/baskets](http://localhost:6004/api/baskets)
+- **Order API**:   [http://localhost:6004/api/baskets](http://localhost:6005/api/Orders)
 
-##Useful Commands:
-- dotnet ef database update
-- dotnet restore
-- dotnet build
-- Migration commands:
-	- dotnet ef migrations add "Init_DB" --project {project dir} --startup-project --output-dir {destination}
-	- dotnet ef migrations add "Order_DocumentNo" --project Ordering.Infastructure --startup-project Ordering.API --output-dir Persistance/Migrations
-- Update Database: dotnet ef database update --project Ordering.Infastructure --startup-project Ordering.API
-``` 
+### Developer Environment (Dev)
+- **Product API**: [http://localhost:5002/api/products](http://localhost:5002/api/products)  
+- **Customer API**: [http://localhost:5003/api/customers](http://localhost:5003/api/customers)  
+- **Basket API**: [http://localhost:5004/api/baskets](http://localhost:5004/api/baskets)  
+- **Order API**:   [http://localhost:6004/api/baskets](http://localhost:5005/api/Orders)
+---
+
+## 3. Docker Application URL - Local
+- **Portainer**: [http://localhost:9000](http://localhost:9000)  
+  - username: `admin`  
+  - password: `admin12345678`  
+
+- **Kibana**: [http://localhost:5601](http://localhost:5601)  
+  - username: `elastic`  
+  - password: `admin`  
+
+- **RabbitMQ**: [http://localhost:15672](http://localhost:15672)  
+  - username: `guest`  
+  - password: `guest`  
+
+---
+
+## 4. Useful Commands
+
+### .NET Core
+```bash
+dotnet restore
+dotnet build
+dotnet ef database update
+```
+
+### Migration Commands
+```bash
+dotnet ef migrations add "Init_DB"   --project {project dir}   --startup-project {startup project}   --output-dir {destination}
+```
+
+```bash
+dotnet ef migrations add "init_migration"   --project Ordering.Infastructure   --startup-project Ordering.API   --output-dir Persistance/Migrations
+```
+
+```bash
+dotnet ef database update   --project Ordering.Infastructure   --startup-project Ordering.API
+```
