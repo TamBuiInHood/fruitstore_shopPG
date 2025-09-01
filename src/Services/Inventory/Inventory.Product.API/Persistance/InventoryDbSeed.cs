@@ -7,7 +7,7 @@ namespace Inventory.Product.API.Persistance
 {
     public class InventoryDbSeed
     {
-        public async Task SeedDataAsync(IMongoClient mongoClient, DatabaseSettings settings)
+        public async Task SeedDataAsync(IMongoClient mongoClient, MongoDbSettings settings)
         {
             var databaseName = settings.DatabaseName;
             var database = mongoClient.GetDatabase(databaseName);

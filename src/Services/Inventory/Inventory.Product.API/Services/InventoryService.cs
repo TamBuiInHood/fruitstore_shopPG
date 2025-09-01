@@ -8,13 +8,14 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using Shared.DTOs.InventoryDTO;
 using Shared.SeedWork;
+using System.Net.WebSockets;
 
 namespace Inventory.Product.API.Services
 {
     public class InventoryService : MongoRepository<InventoryEntry>, IInventoryServices
     {
         private readonly IMapper _mapper;
-        public InventoryService(IMongoClient client, DatabaseSettings settings, IMapper mapper) : base(client, settings)
+        public InventoryService(IMongoClient client, MongoDbSettings settings, IMapper mapper) : base(client, settings)
         {
             _mapper = mapper;
         }
@@ -22,7 +23,7 @@ namespace Inventory.Product.API.Services
         public async Task<IEnumerable<InventoryEntryDto>> GetAllByItemNoAsync(string itemNo)
         {
             var entities = await FindAll()
-                .Find(x => x.ItemNo.Equals(itemNo))
+                .Find(x => x.ItemNo.Equals(itemNo, StringComparison.OrdinalIgnoreCase))
                 .ToListAsync();
             var result = _mapper.Map<IEnumerable<InventoryEntryDto>>(entities);
             
@@ -37,16 +38,17 @@ namespace Inventory.Product.API.Services
                 filterSearchTerms = Builders<InventoryEntry>.Filter.Eq(x => x.DocumentNo, query.SearchTerm);
 
             var andFilter = filterItemNo & filterSearchTerms;
-            var pageList = await Collection.Find(andFilter)
-                .Skip((query.PageIndex - 1)* query.PageSize)
-                .Limit(query.PageSize)
-                .ToListAsync();
-            var reuslt = _mapper.Map<IEnumerable<InventoryEntryDto>>(pageList);
+            var pageList = await  PaginatedListAsync(filter: andFilter, query.PageIndex,query.PageSize);
+            var items = _mapper.Map<IEnumerable<InventoryEntryDto>>(pageList);
 
-            //var reuslt = _mapper.Map < IEnumerable<InventoryEntryDto>>(pageList);
-            
-            return reuslt;
+            var result = new PageList<InventoryEntryDto>(items,
+                                           pageList.GetMetaData().TotalItems,
+                                           query.PageIndex,
+                                           query.PageSize);
+
+            return result; 
         }
+
 
         public async Task<InventoryEntryDto> GetByIdAsync(string id)
         {
@@ -56,11 +58,20 @@ namespace Inventory.Product.API.Services
             return reuslt;
         }
 
+        public async Task<double> GetAvailableQuantity(string itemNo)
+        {
+            var entities = await FindAll()
+                .Find(x => x.ItemNo.Equals(itemNo, StringComparison.OrdinalIgnoreCase))
+                .ToListAsync();
+            var result = entities.Sum(x => x.Quantity);
+
+            return result;
+        }
         public async Task<InventoryEntryDto> PurchaseItemAsync(string itemNo, PurchaseProductDto model)
         {
             var itemToAdd = new InventoryEntry(ObjectId.GenerateNewId().ToString())
             {
-                ItemNo = model.ItemNo,
+                ItemNo = itemNo,
                 Quantity = model.Quantity,
                 DocumentType = model.DocumentType,
 

@@ -4,17 +4,15 @@ using Product.API.Presistance;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog(Serilogger.Configure);
 
-Log.Information("Start Product API up");
+Log.Information($"Start {builder.Environment.EnvironmentName} up");
 // Add services to the container.
 
 try
 {
-
-    builder.Host.UseSerilog(Serilogger.Configure);
     builder.Host.AddAppConfiguration();
     // add service to the container.
+    builder.Services.AddConfigurationSettings(builder.Configuration);
     builder.Services.AddInfracstructure(builder.Configuration);
     var app = builder.Build();
 
@@ -26,8 +24,8 @@ try
     })
         .Run();
     app.Run();
-} 
-catch( Exception ex)
+}
+catch (Exception ex)
 {
     string type = ex.GetType().Name;
     if (type.Equals("StopTheHostException", StringComparison.Ordinal))

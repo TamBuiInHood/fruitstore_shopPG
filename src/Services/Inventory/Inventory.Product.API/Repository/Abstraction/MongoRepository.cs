@@ -1,8 +1,11 @@
-﻿using Inventory.Product.API.Entities.Abstraction;
+﻿using Inventory.Product.API.Entities;
+using Inventory.Product.API.Entities.Abstraction;
 using Inventory.Product.API.Extensions;
 using MongoDB.Driver;
+using Shared.SeedWork;
 using System.Linq;
 using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Inventory.Product.API.Repository.Abstraction
 {
@@ -11,7 +14,7 @@ namespace Inventory.Product.API.Repository.Abstraction
     {
         private IMongoDatabase database { get; }
 
-        public MongoRepository(IMongoClient client, DatabaseSettings settings)
+        public MongoRepository(IMongoClient client, MongoDbSettings settings)
         {
             database = client.GetDatabase(settings.DatabaseName);
         }
@@ -25,6 +28,9 @@ namespace Inventory.Product.API.Repository.Abstraction
         public IMongoCollection<T> FindAll(ReadPreference? readPreferance = null)
             => database.WithReadPreference(readPreferance ?? ReadPreference.Primary)
             .GetCollection<T>(GetCollectionName());
+
+        public async Task<PageList<T>> PaginatedListAsync( FilterDefinition<T> filter, int pageIndex, int pageSize)
+        => await PageList<T>.ToPagedList(Collection,filter, pageIndex, pageSize);
 
         protected virtual IMongoCollection<T> Collection => database.GetCollection<T>(GetCollectionName());
 

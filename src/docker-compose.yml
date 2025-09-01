@@ -58,6 +58,12 @@ services:
       context: ./ #nằm trong Services không cùng cấp với docker-compose nên phải tiến vào 1 mục nữa
       dockerfile: Services/Ordering/Ordering.API/Dockerfile
 
+  inventory.product.api:
+    image: ${DOCKER_REGISTRY-}inventory-product-api:${PLATFORM:-linux}-${TAG:-latest}
+    build: 
+      context: ./ #nằm trong Services không cùng cấp với docker-compose nên phải tiến vào 1 mục nữa
+      dockerfile: Services/Inventory/Inventory.Product.API/Dockerfile
+
 #network section/ de khi su dung tat ca deu chang chung 1 mang netword
 networks:
   default: 

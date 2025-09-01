@@ -6,11 +6,26 @@ using Contracts.Common.Interfaces;
 using Infrastructure.Common;
 using Product.API.Repositories.Interfaces;
 using Product.API.Repositories;
+using Shared.Configurations;
+using Microsoft.Extensions.Configuration;
+using Infrastructure.Extensions;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Product.API.Extensions
 {
     public static class ServiceExtensions
     {
+        internal static IServiceCollection AddConfigurationSettings(this IServiceCollection services, IConfiguration configuration)
+        {
+
+            var jwtSettings = configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>();
+            services.AddSingleton(jwtSettings);
+
+            return services;
+        }
+
         public static IServiceCollection AddInfracstructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers();
@@ -47,6 +62,40 @@ namespace Product.API.Extensions
                 .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
                 .AddScoped<IProductRepository, ProductRepository>()
                 ;
+        }
+
+        internal static IServiceCollection AddJwtAuthentication(this IServiceCollection services)
+        {
+            var settings = services.GetOptions<JwtSettings>(nameof(JwtSettings));
+            if (settings == null || string.IsNullOrEmpty(settings.Key))
+                throw new ArgumentNullException($"" +
+                    $"{nameof(settings.Key)} is not configured");
+
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Key));
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = signingKey,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ClockSkew = TimeSpan.Zero,
+                RequireExpirationTime = false,
+            };
+            services.AddAuthentication(o =>
+            {
+                o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(x =>
+            {
+                x.SaveToken = true;
+                x.RequireHttpsMetadata = false;
+                x.TokenValidationParameters = tokenValidationParameters;
+            });
+
+            return services;
         }
     }
 }

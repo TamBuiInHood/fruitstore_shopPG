@@ -2,6 +2,7 @@ using Common.Loggin;
 using Contracts.Common.Interfaces;
 using Customer.API;
 using Customer.API.Controller;
+using Customer.API.Extensions;
 using Customer.API.Persistence;
 using Customer.API.Repositories;
 using Customer.API.Repositories.Interfaces;
@@ -14,9 +15,8 @@ using Serilog;
 using Shared.DTOs.CustomerDTO;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog(Serilogger.Configure);
 
-Log.Information("Start Customer API up");
+Log.Information($"Start {builder.Environment.EnvironmentName} up");
 // Add services to the container.
 
 try
@@ -25,19 +25,9 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-
+    builder.Services.ConfigureServices();
+    builder.Services.AddInfrastructureServices(builder.Configuration);
     builder.Services.AddAutoMapper(cfg => cfg.AddProfile(new MappingProfile()));
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
-
-    builder.Services.AddDbContext<CustomerContext>(
-        m =>
-            m.UseNpgsql(connectionString));
-
-    builder.Services
-        .AddScoped<ICustomerRepository, CustomerRepository>()
-        .AddScoped(typeof(IRepositoryBaseAsync<,,>), typeof(RepositoryBase<,,>))
-        .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
-        .AddScoped<ICustomerService, CustomerService>();
 
     var app = builder.Build();
 

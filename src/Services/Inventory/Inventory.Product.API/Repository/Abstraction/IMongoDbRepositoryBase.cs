@@ -1,5 +1,6 @@
 ﻿using Inventory.Product.API.Entities.Abstraction;
 using MongoDB.Driver;
+using Shared.SeedWork;
 
 namespace Inventory.Product.API.Repository.Abstraction
 {
@@ -9,5 +10,7 @@ namespace Inventory.Product.API.Repository.Abstraction
         Task CreateAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(string id);
+        Task<PageList<T>> PaginatedListAsync(FilterDefinition<T> filter, int pageIndex, int pageSize);
+
     }
 }

@@ -10,10 +10,15 @@ namespace Shared.DTOs.InventoryDTO
     public class PurchaseProductDto
     {
         public EDocumentType DocumentType => EDocumentType.Purchase;
-        public string ItemNo { get; set; }
+        public string ItemNo { get; private set; }
         public string DocumentNo { get; set; }
-        public string ExtranalDocumentNo { get; set; }
+        public string ExtranalDocumentNo { get; set; } 
         public int Quantity { get; set; }
 
+        public PurchaseProductDto(string itemNo, int quantity)
+        {
+            ItemNo = itemNo;
+            Quantity = quantity;
+        }
     }
 }

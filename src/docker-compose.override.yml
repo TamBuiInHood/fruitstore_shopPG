@@ -159,3 +159,18 @@ services:
       - "6005:80"
     restart: always
 
+  inventory.product.api:
+    container_name: inventory.product.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - "MongoDbSettings:ConnectionString=mongodb://inventorydb:27017"
+      - "MongoDbSettings:DatabaseName=InventoryDb;"
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
+    depends_on:
+      - inventorydb
+      - rabbitmq
+    ports:
+      - "6006:80"
+    restart: always
+

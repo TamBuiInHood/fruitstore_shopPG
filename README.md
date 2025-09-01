@@ -1,6 +1,10 @@
-## Server Side with microservice
-
-# Docker Compose Setup
+# Serverside of Shop with microservice
+- Building a shop with basic function for both client and owner, shopping page with product, cart, order with payment, customer management, inventory management...
+- Product server: Monolithic with MySQL
+- Order server: Clean Architecture + DDD with MSSQL
+- Inventory server: Repository pattern with MongoDb
+- Customer management: postgreQL
+## Docker Compose Setup
 
 ## 1. Run Docker Compose
 Chạy lệnh sau trong thư mục **src** (nơi chứa file `docker-compose`):
