@@ -11,11 +11,10 @@ namespace Shared.DTOs.InventoryDTO
     {
         public string Id { get; set; }
         public EDocumentType DocumentType { get; set; }
-
         public string DocumentNo { get; set; }
         public string itemNo { get; set; }
         public int Quantity { get; set; }
-        public string ExternalDocumentNo { get; set; }
-
+        public string ExtranalDocumentNo { get; set; }
+        public DateTime CreateDate { get; set; }
     }
 }

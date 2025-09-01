@@ -7,7 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="ocelot.Development.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ocelot" Version="18.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ocelot.Development.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\Common.Loggin\Common.Loggin.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Shared\Shared.csproj" />
+    <ProjectReference Include="..\..\Services\Ordering\Ordering.Infastructure\Ordering.Infastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -65,8 +65,13 @@ namespace Basket.API.Controllers
             // publish checkout event to eventbus Message
             var eventMessage = _mapper.Map<BasketCheckoutEvent>(basketCheckout);
             eventMessage.TotalPrice = basket.TotalPrice;
-            
+            // punlish for inventory
+
+            eventMessage.Items = _mapper.Map<List<EventBus.Messages.IntergrationEvents.IntegrationEvents.Events.CartItem>>(basket.Items);
+
             _publishEndpoint.Publish(eventMessage);
+
+           
 
             //remove the basket
             await _repository.DeleteBaskeyFromUserName(basketCheckout.UserName);

@@ -3,6 +3,7 @@ using Inventory.Product.API;
 using Inventory.Product.API.Extensions;
 using Serilog;
 
+Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog(Serilogger.Configure);
 
@@ -21,6 +22,7 @@ try
     builder.Services.AddConfigurationSettings(builder.Configuration);
     builder.Services.AddInfrastructureServices();
     builder.Services.ConfigureMongoDbClient();
+    builder.Services.ConfigureMassTransit();
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.

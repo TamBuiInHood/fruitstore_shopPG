@@ -1,7 +1,9 @@
 using Basket.API;
 using Basket.API.Extensions;
 using Common.Loggin;
+using Contracts.Services;
 using Serilog;
+using Shared.DTOs.InventoryDTO;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -21,7 +23,7 @@ try
     builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
     builder.Host.AddAppConfiguration();
     builder.Services.AddConfigurationSettings(builder.Configuration);
-
+    builder.Services.ConfigureClient();
     builder.Services.ConfigureServices();
     builder.Services.ConfigRedis(builder.Configuration);
     builder.Services.AddControllers();

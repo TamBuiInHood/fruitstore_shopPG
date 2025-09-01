@@ -1,7 +1,12 @@
 ﻿using Basket.API.Entities;
+using Basket.API.Extensions;
+using Basket.API.Extensions.Service.Interface;
 using Basket.API.Repositories.Interfaces;
 using Contracts.Common.Interfaces;
+using Contracts.Services;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
+using Shared.DTOs.InventoryDTO;
 using ILogger = Serilog.ILogger;
 
 namespace Basket.API.Repositories
@@ -11,11 +16,14 @@ namespace Basket.API.Repositories
         private readonly IDistributedCache _redisCacheService;
         private readonly ISerializeServices _serializeServices;
         private readonly ILogger _logger;
-        public BasketRepository(IDistributedCache redisCacheService, ILogger logger, ISerializeServices serializeServices)
+        private readonly IInventoryServiceClient _client;
+
+        public BasketRepository(IDistributedCache redisCacheService, ILogger logger, ISerializeServices serializeServices, IInventoryServiceClient httpClient)
         {
             _redisCacheService = redisCacheService;
             _logger = logger;
             _serializeServices = serializeServices;
+            _client = httpClient;
         }
 
         public async Task<Cart?> GetBaskeyByUserName(string UserName)
@@ -23,7 +31,17 @@ namespace Basket.API.Repositories
             _logger.Information($"BEGIN: GetBasketByUserName {UserName}");
             var basket = await _redisCacheService.GetStringAsync(UserName);
             _logger.Information($"END: GetBasketByUserName {UserName}");
-            return String.IsNullOrEmpty(basket) ? null : _serializeServices.Deserialize<Cart>(basket);
+
+            if (string.IsNullOrEmpty(basket)) return null;
+
+            var cart = _serializeServices.Deserialize<Cart>(basket);
+
+            foreach (var item in cart.Items)
+            {
+                var inventory = await _client.GetQuantityThrougtApi(item.ItemNo);
+                item.AvailableQuantity = inventory;
+            }
+            return string.IsNullOrEmpty(basket) ? null : cart;
         }
 
         public async Task<Cart?> UpdateBasket(Cart cart, DistributedCacheEntryOptions options = null)
@@ -36,6 +54,12 @@ namespace Basket.API.Repositories
             else
             {
                 await _redisCacheService.SetStringAsync(cart.Username, _serializeServices.Serialize(cart));
+            }
+
+            foreach (var item in cart.Items)
+            {
+                var inventory = await _client.GetQuantityThrougtApi(item.ItemNo);
+                item.AvailableQuantity = inventory;
             }
             _logger.Information($"END: UpdateBasket for{cart.Username}");
             return await GetBaskeyByUserName(cart.Username);
@@ -57,5 +81,16 @@ namespace Basket.API.Repositories
             }
         }
 
+        public async Task<string> CheckStockQuantityEnough(Cart cart)
+        {
+            _logger.Information($"BEGIN: CheckStockQuantityEnough of {cart.Username}");
+            foreach (var item in cart.Items)
+            {
+                var inventory = await _client.GetQuantityThrougtApi(item.ItemNo);
+                if (item.Quantity > inventory) return $"Item no {item.ItemNo} is not enought." ;
+            }
+            _logger.Information($"END: CheckStockQuantityEnough of {cart.Username}");
+            return null;
+        }
     }
 }

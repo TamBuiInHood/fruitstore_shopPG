@@ -7,7 +7,7 @@
             host.ConfigureAppConfiguration((context, config) =>
             {
                 var evn = context.HostingEnvironment;
-                config.AddJsonFile("appsetting.json", optional: true, reloadOnChange: true)
+                config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
             });
         }
